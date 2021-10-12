@@ -28,6 +28,25 @@ const promptUser = () => {
       name: "about",
       message: "Provide some information about yourself:",
     },
+    {
+      type: "confirm",
+      name: "confirmAbout",
+      message:
+        'Would you like to enter some information about yourself for an "About" section?',
+      default: true,
+    },
+    {
+      type: "input",
+      name: "about",
+      message: "Provide some information about yourself:",
+      when: ({ confirmAbout }) => {
+        if (confirmAbout) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+    },
   ]);
 };
 
@@ -37,52 +56,91 @@ const promptProject = (portfolioData) => {
   Add a New Project
   =============================
   `);
-  return inquirer.prompt([
-    {
-      type: "input",
-      name: "name",
-      message: "What is the name of your project?",
-    },
-    {
-      type: "input",
-      name: "description",
-      message: "Please provide a description of your Project (Required)",
-    },
-    {
-      type: "checkbox",
-      name: "languages",
-      message: "What did you build this project with? (Check all that apply)",
-      choices: [
-        "JavaScript",
-        "HTML",
-        "CSS",
-        "ES6",
-        "jQuery",
-        "Bootstrap",
-        "Node",
-      ],
-    },
-    {
-      type: "input",
-      name: "link",
-      message: "Enter the GitHub link to your project (Required)",
-    },
-    {
-      type: "confirm",
-      name: "feature",
-      message: "Would you like to feature this project?",
-      default: false,
-    },
-    {
-      type: "confirm",
-      name: "confirmAddProject",
-      message: "Would you like to Enter another project?",
-      default: false,
-    },
-  ]);
+
+  //If there is no 'projects' array create one:
+  if (!portfolioData.projects) {
+    portfolioData.projects = [];
+  }
+  return inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "name",
+        message: "What is the name of your project?",
+        validate: (nameInput) => {
+          if (nameInput) {
+            return true;
+          } else {
+            console.log("Please enter your Project Name!");
+            return false;
+          }
+        },
+      },
+      {
+        type: "input",
+        name: "description",
+        message: "Please provide a description of your Project (Required)",
+        validate: (nameInput) => {
+          if (nameInput) {
+            return true;
+          } else {
+            console.log("Please Provide a Description!");
+            return false;
+          }
+        },
+      },
+      {
+        type: "checkbox",
+        name: "languages",
+        message: "What did you build this project with? (Check all that apply)",
+        choices: [
+          "JavaScript",
+          "HTML",
+          "CSS",
+          "ES6",
+          "jQuery",
+          "Bootstrap",
+          "Node",
+        ],
+      },
+      {
+        type: "input",
+        name: "link",
+        message: "Enter the GitHub link to your project (Required)",
+        validate: (nameInput) => {
+          if (nameInput) {
+            return true;
+          } else {
+            console.log("Please enter your Github Link!");
+            return false;
+          }
+        },
+      },
+      {
+        type: "confirm",
+        name: "feature",
+        message: "Would you like to feature this project?",
+        default: false,
+      },
+      {
+        type: "confirm",
+        name: "confirmAddProject",
+        message: "Would you like to Enter another project?",
+        default: false,
+      },
+    ])
+    .then((projectData) => {
+      portfolioData.projects.push(projectData);
+      if (projectData.confirmAddProject) {
+        return promptProject(portfolioData);
+      } else {
+        return portfolioData;
+      }
+    });
 };
 
 promptUser()
-  .then((answers) => console.log(answers))
   .then(promptProject)
-  .then((projectAnswers) => console.log(projectAnswers));
+  .then((portfolioData) => {
+    console.log(portfolioData);
+  });
